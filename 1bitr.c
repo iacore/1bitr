@@ -216,7 +216,7 @@ static void set_engine(char c) {
   switch (c) {
     case '0': engine = engine_0; break;
     case '1': engine = engine_1; break;
-    default: fprintf(stderr, "invalid engine: %c\n", c); return;
+    default: fprintf(stderr, "invalid engine: %c\n", c); exit(1);
   }
 }
 
@@ -226,19 +226,25 @@ int main(int argc, const char *argv[]) {
   int row[256] = {0}, *rowptr = row;
   int lineno = 1;
   if (isatty(1)) {
-    puts("refuse to output to tty");
+    fputs("refuse to output to tty", stderr);
     exit(1);
   }
-  struct backend *backend = &wav;
 
-  if (argc == 2 && strlen(argv[1]) == 2 && argv[1][0] == '-') {
+  if (argc == 1) {}
+  else if (argc == 2 && strlen(argv[1]) == 2 && argv[1][0] == '-') {
     if (argv[1][1] == 'h') {
       fprintf(stderr, "%s [-X], where X is sound engine ID (try -0 or -1)\n",
               argv[0]);
       return 1;
     }
     set_engine(argv[1][1]);
+  } else {
+    fputs("Invalid usage", stderr);
+    fputs("Usage: ./1bitr < score > music.bin", stderr);
+    exit(1);
   }
+
+  struct backend *backend = &wav;
 
   if (backend->start() < 0) {
     fprintf(stderr, "failed to start playback: %d\n", errno);
